@@ -58,7 +58,12 @@
                 <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}"
                      {% if request.user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
                   <div class="panel-body">
-                    <span class="assignment-submission__date pull-right">{{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
+                    <span class="assignment-submission__date pull-right">
+                      {{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}
+                      {% if comment.modified > comment.created %}
+                        <span class="text-muted small"> · {{ _('edited') }} {{ comment.modified_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
+                      {% endif %}
+                    </span>
                     <h5 class="assignment">{{ comment.get_author_name() }}</h5>
                     <div class="text-muted"><p>{{ get_score_status_changing_message(comment) }}</p></div>
                     {% if comment.text %}
@@ -76,23 +81,33 @@
                     {% endif %}
                   </div>
 
-                  {% with checker_submission = comment.submission %}
-                    {% if checker_submission %}
-                      <div class="panel-footer" style="border-top: 1px solid #eee;">
-                        <div class="clearfix">
+                  {% set checker_submission = comment.submission %}
+                  {% set can_edit_comment = comment.type == 'comment' and comment.author_id == request.user.pk %}
+                  {% set show_panel_footer = can_edit_comment or checker_submission %}
+                  {% if show_panel_footer %}
+                    <div class="panel-footer" style="border-top: 1px solid #eee;">
+                      <div class="clearfix">
+                        {% if checker_submission %}
                           {% if checker_submission.report_url %}
                             <a class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}" target="_blank"
                                href="{{ checker_submission.report_url }}">
                               {{ checker_submission.verdict_or_status }}
                             </a>
                           {% else %}
-                            <span
-                              class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}">{{ checker_submission.verdict_or_status }}</span>
+                            <span class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}">{{ checker_submission.verdict_or_status }}</span>
                           {% endif %}
-                        </div>
+                        {% endif %}
+                        {% if can_edit_comment %}
+                          <button type="button"
+                                  class="btn btn-xs btn-link pull-right js-inline-edit"
+                                  data-comment-id="{{ comment.pk }}"
+                                  data-update-url="{{ url('study:student_assignment_comment_edit', pk=a_s.pk, comment_pk=comment.pk) }}">
+                            {{ _('Edit') }}
+                          </button>
+                        {% endif %}
                       </div>
-                    {% endif %}
-                  {% endwith %}
+                    </div>
+                  {% endif %}
                 </div>
               </li>
             {% endfor %}
@@ -103,6 +118,95 @@
             {{ jba_error }}
           </div>
         {% endif %}
+
+        {# Inline editing JS #}
+        <script>
+          (function() {
+            function getCookie(name) {
+              const value = `; ${document.cookie}`;
+              const parts = value.split(`; ${name}=`);
+              if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+            function onEditClick(e) {
+              const btn = e.currentTarget;
+              const panel = btn.closest('.assignment-submission');
+              const content = panel.querySelector('.ubertext');
+              const originalHTML = content ? content.innerHTML : '';
+              const originalText = content ? content.textContent : '';
+              const updateUrl = btn.dataset.updateUrl;
+              // Build editor UI
+              const textarea = document.createElement('textarea');
+              textarea.className = 'form-control';
+              textarea.value = originalText.trim();
+              textarea.rows = Math.min(12, Math.max(4, Math.ceil(textarea.value.length / 120)));
+              const actions = document.createElement('div');
+              actions.className = 'mt-10';
+              const saveBtn = document.createElement('button');
+              saveBtn.className = 'btn btn-primary btn-sm';
+              saveBtn.textContent = '{{ _('Save') }}';
+              const cancelBtn = document.createElement('button');
+              cancelBtn.className = 'btn btn-default btn-sm ml-5';
+              cancelBtn.textContent = '{{ _('Cancel') }}';
+              actions.appendChild(saveBtn);
+              actions.appendChild(cancelBtn);
+              // Replace content
+              const container = document.createElement('div');
+              container.className = 'inline-editor';
+              container.appendChild(textarea);
+              container.appendChild(actions);
+              if (content) {
+                content.replaceWith(container);
+              } else {
+                panel.querySelector('.panel-body').appendChild(container);
+              }
+              btn.disabled = true;
+              cancelBtn.addEventListener('click', function() {
+                // Restore
+                const newContent = document.createElement('div');
+                newContent.className = 'ubertext';
+                newContent.innerHTML = originalHTML;
+                container.replaceWith(newContent);
+                btn.disabled = false;
+              });
+              saveBtn.addEventListener('click', function() {
+                const form = new FormData();
+                form.append('text', textarea.value);
+                form.append('csrfmiddlewaretoken', getCookie('csrftoken') || '');
+                fetch(updateUrl, { method: 'POST', body: form, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                  .then(r => r.json())
+                  .then(data => {
+                    if (!data.success) {
+                      alert('Ошибка сохранения');
+                      return;
+                    }
+                    const newContent = document.createElement('div');
+                    newContent.className = 'ubertext';
+                    newContent.innerHTML = data.html;
+                    container.replaceWith(newContent);
+                    // update edited label if present
+                    const dateEl = panel.querySelector('.assignment-submission__date');
+                    if (dateEl && data.modified_human) {
+                      const editedSpan = document.createElement('span');
+                      editedSpan.className = 'text-muted small';
+                      editedSpan.textContent = ' · {{ _('edited') }} ' + data.modified_human;
+                      // remove previous edited spans
+                      const prev = dateEl.querySelector('.text-muted.small');
+                      if (prev) prev.remove();
+                      dateEl.appendChild(editedSpan);
+                    }
+                    btn.disabled = false;
+                  })
+                  .catch(() => {
+                    alert('Ошибка сети при сохранении');
+                    btn.disabled = false;
+                  });
+              });
+            }
+            document.querySelectorAll('.js-inline-edit').forEach(function(btn){
+              btn.addEventListener('click', onEditClick);
+            });
+          })();
+        </script>
         <div class="mt-30 assignment-actions">
           {% if solution_form %}
             <button id="add-solution" class="btn btn-lg btn-link active">

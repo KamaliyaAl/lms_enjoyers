@@ -771,6 +771,11 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
+    def modified_local(self, tz=None):
+        if not tz:
+            tz = self.get_timezone()
+        return timezone.localtime(self.modified, timezone=tz)
+
     def get_update_url(self):
         return reverse('teaching:student_assignment_comment_edit', kwargs={
             "pk": self.student_assignment_id,

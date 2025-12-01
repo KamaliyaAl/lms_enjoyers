@@ -113,6 +113,10 @@
       html[data-theme="dark"] .box, html[data-theme="dark"] .box-header, html[data-theme="dark"] .box-body { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
       /* Theme toggle button uses current theme colors */
       .theme-toggle { border: 1px solid var(--border); background: transparent; color: var(--fg); border-radius: 4px; padding: 4px 8px; margin-right: 10px; }
+      /* Ensure toggle button text/icon are readable in dark theme */
+      html[data-theme="dark"] .theme-toggle,
+      html[data-theme="dark"] #theme-toggle,
+      html[data-theme="dark"] #login-theme-toggle { color: #F3F4F6 !important; border-color: var(--border) !important; }
       /* Ensure second-level menu is readable in dark theme */
       html[data-theme="dark"] .menu.lvl2 { background: var(--bg) !important; color: var(--fg) !important; border-color: var(--border) !important; }
       html[data-theme="dark"] .menu.lvl2 ul li a { color: var(--fg) !important; }
@@ -130,6 +134,8 @@
       html[data-theme="dark"] .footer { background: var(--bg) !important; color: var(--fg) !important; border-color: var(--border) !important; }
       html[data-theme="dark"] .footer a { color: #FFFFFF !important; }
       html[data-theme="dark"] .footer a:hover, html[data-theme="dark"] .footer a:focus { color: #E5E7EB !important; }
+      /* Users page additional info container */
+      html[data-theme="dark"] .profile-additional-info { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
     </style>
     <script>
       // Apply preferred theme ASAP to avoid flash

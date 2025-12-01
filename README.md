@@ -72,3 +72,44 @@ If you want to run tests from some specific folders, append the folder names to 
 4. Install the JetBrains Academy plugin
 5. Open any JBA course
 6. Use the "Change Submissions Service URL" action to set the URL to `http://localhost:8080`
+
+## Run with docker-compose
+
+The easiest way to run the LMS locally is via docker-compose. It will start PostgreSQL, Redis, and the app, bind them to localhost ports, and build frontend assets inside the image.
+
+Prerequisites: Docker and Docker Compose (Docker Desktop includes compose).
+
+### Start
+```
+# From the repository root
+docker compose up -d --build
+```
+- App: http://localhost:8001
+- Health check: http://localhost:8001/health-check/
+- Admin: http://localhost:8001/admin/
+
+If you need a superuser to log into admin:
+```
+docker compose exec lms-app bash -lc 'ENV_FILE=/var/www/code/.env.docker python manage.py createsuperuser'
+```
+
+### Stop, restart, logs
+```
+# Stop
+docker compose down
+
+# Start again (without rebuilding)
+docker compose up -d
+
+# Tail app logs
+docker compose logs -f lms-app
+```
+
+### Ports and env
+- PostgreSQL: host 5433 -> container 5432
+- Redis: host 6379 -> container 6379
+- App: http://localhost:8001
+
+The application uses `.env.docker` inside the container (set via `ENV_FILE=/var/www/code/.env.docker`).
+
+Note: If your host port 5432 is free and you prefer to use it, change the Postgres port mapping in `docker-compose.yml` from `5433:5432` to `5432:5432`.

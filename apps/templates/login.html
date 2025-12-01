@@ -6,10 +6,26 @@
 {% block body_attrs %} class="sign-in"{% endblock body_attrs %}
 
 {% block stylesheets %}
+<script>
+  // Early apply of theme for login page
+  (function(){
+    try {
+      var stored = localStorage.getItem('theme');
+      var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
+    } catch (e) {}
+  })();
+</script>
 <style>
-  .grecaptcha-badge {
-    z-index: 1;
-  }
+  .grecaptcha-badge { z-index: 1; }
+  /* Dark theme login page styles (light theme untouched) */
+  html[data-theme="dark"], html[data-theme="dark"] body.sign-in { background: #111827 !important; color: #F3F4F6 !important; min-height: 100vh; }
+  html[data-theme="dark"] .container, html[data-theme="dark"] .row { background: #111827 !important; color: #F3F4F6 !important; }
+  html[data-theme="dark"] .container-box.panel.panel-body.panel-default { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+  html[data-theme="dark"] label, html[data-theme="dark"] .error-message { color: #F3F4F6 !important; }
+  html[data-theme="dark"] input.form-control { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+  html[data-theme="dark"] a.forgot { color: #F3F4F6 !important; }
+  html[data-theme="dark"] input.btn.btn-primary.sign-up-in { background: #374151 !important; border-color: #4B5563 !important; color: #F3F4F6 !important; }
 </style>
 {% endblock %}
 
@@ -18,6 +34,9 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="container-box panel panel-body panel-default">
+                <div class="row"><div class="col-xs-12 text-right" style="margin-bottom:10px;">
+                  <button id="login-theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme"><i class="fa fa-moon-o"></i></button>
+                </div></div>
                 <form id="sign-in" method="POST">
                     {% block form_legend %}
                         {% if has_next %}

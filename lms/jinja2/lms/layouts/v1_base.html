@@ -8,14 +8,135 @@
     <title>{% block title %}{{ request.site.name }}{% endblock title %}</title>
     <link rel="shortcut icon" type="image/png" href="{{ static(FAVICON_PATH) }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{{ static("v1/dist/css/center_style.css") }}" rel="stylesheet">
+    <link href='{{ static("v1/dist/css/center_style.css") }}' rel="stylesheet">
     {% if request.user.is_curator %}
-        <link href="{{ static("v1/dist/css/center_staff.css") }}" rel="stylesheet">
+        <link href='{{ static("v1/dist/css/center_staff.css") }}' rel="stylesheet">
     {% endif %}
     {% block hightlight_styles %}
-    <link href="{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
+    <link href='{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}' rel="stylesheet">
     {% endblock hightlight_styles %}
     {% block stylesheets %} {% endblock stylesheets %}
+<!--    <style>-->
+<!--        body.footer {-->
+<!--            background-color: #1a1a1a;-->
+<!--            color: #ffffff;-->
+<!--        }-->
+<!--    </style>-->
+    <style>
+      /* Only define variables for dark theme to avoid changing light theme */
+      html[data-theme="dark"] { /* variables scope */
+        --bg: #111827; /* gray-900 */
+        --fg: #F3F4F6; /* gray-100 */
+        --muted: #9CA3AF; /* gray-400 */
+        --border: #374151; /* gray-700 */
+        --bg-elev: #111827; /* unify elevated surfaces with base bg to avoid "holes" */
+        --link: #6366F1; /* indigo-500 */
+        --link-hover: #818CF8; /* indigo-400 */
+      }
+      /* Apply dark theme styles only when [data-theme="dark"] is set */
+      html[data-theme="dark"], html[data-theme="dark"] body {
+        background: var(--bg) !important;
+        color: var(--fg) !important;
+        min-height: 100vh !important;
+      }
+      /* Ensure full-viewport dark overlay to eliminate corner gaps */
+      html[data-theme="dark"] body { position: relative; z-index: 1; }
+      html[data-theme="dark"] body::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+
+        pointer-events: none;
+        z-index: 0;
+      }
+      /* Ensure page content areas are dark in dark theme */
+      html[data-theme="dark"] .container,
+      html[data-theme="dark"] .row,
+      html[data-theme="dark"] .content,
+      html[data-theme="dark"] .page-content,
+      html[data-theme="dark"] .panel,
+      html[data-theme="dark"] .well,
+      html[data-theme="dark"] .table,
+      html[data-theme="dark"] .dropdown-menu { background: var(--bg) !important; }
+      /* Links (only affect dark) */
+      html[data-theme="dark"] a { color: #FFFFFF !important; }
+      html[data-theme="dark"] a:hover, html[data-theme="dark"] a:focus { color: #E5E7EB !important; }
+      /* Tables, panels, forms, dropdowns (dark elev surfaces) */
+      html[data-theme="dark"] .table,
+      html[data-theme="dark"] .panel,
+      html[data-theme="dark"] .well,
+      html[data-theme="dark"] .dropdown-menu { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      html[data-theme="dark"] .form-control, html[data-theme="dark"] .selectpicker, html[data-theme="dark"] select,
+      html[data-theme="dark"] input, html[data-theme="dark"] textarea { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      /* Headings and general text must be light on dark */
+      html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+      html[data-theme="dark"] h4, html[data-theme="dark"] h5, html[data-theme="dark"] h6,
+      html[data-theme="dark"] p, html[data-theme="dark"] li, html[data-theme="dark"] td,
+      html[data-theme="dark"] th, html[data-theme="dark"] span, html[data-theme="dark"] .badge { color: var(--fg) !important; }
+      /* Controls in filters and selects should be dark background with light text */
+      html[data-theme="dark"] .bootstrap-select .btn,
+      html[data-theme="dark"] .bootstrap-select > .dropdown-toggle,
+      html[data-theme="dark"] .btn,
+      html[data-theme="dark"] .btn-default,
+      html[data-theme="dark"] select,
+      html[data-theme="dark"] .selectpicker,
+      html[data-theme="dark"] input,
+      html[data-theme="dark"] textarea { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      html[data-theme="dark"] .bootstrap-select .filter-option,
+      html[data-theme="dark"] .bootstrap-select .filter-option-inner,
+      html[data-theme="dark"] .bootstrap-select .filter-option-inner-inner { color: var(--fg) !important; }
+      html[data-theme="dark"] .bootstrap-select .dropdown-menu,
+      html[data-theme="dark"] .dropdown-menu > li > a,
+      html[data-theme="dark"] .dropdown-menu > li > a:focus,
+      html[data-theme="dark"] .dropdown-menu > li > a:hover { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      /* Cover common Bootstrap/UI blocks that may stay light */
+      html[data-theme="dark"] .panel-heading,
+      html[data-theme="dark"] .panel-footer,
+      html[data-theme="dark"] .list-group-item,
+      html[data-theme="dark"] .nav-tabs > li > a,
+      html[data-theme="dark"] .nav-tabs > li.active > a,
+      html[data-theme="dark"] .tab-content,
+      html[data-theme="dark"] .breadcrumb,
+      html[data-theme="dark"] .pagination > li > a,
+      html[data-theme="dark"] .pagination > li > span,
+      html[data-theme="dark"] .alert,
+      html[data-theme="dark"] pre,
+      html[data-theme="dark"] code,
+      html[data-theme="dark"] kbd,
+      html[data-theme="dark"] samp,
+      html[data-theme="dark"] .label,
+      html[data-theme="dark"] .well,
+      html[data-theme="dark"] .modal-content,
+      html[data-theme="dark"] .popover,
+      html[data-theme="dark"] .tooltip-inner { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      html[data-theme="dark"] .table > thead > tr > th { background: var(--bg) !important; color: var(--fg) !important; }
+      html[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) { background-color: #151B2B !important; }
+      html[data-theme="dark"] .bg-white, html[data-theme="dark"] .bg-light, html[data-theme="dark"] .bg-default { background: var(--bg) !important; }
+      /* Cover pages using body.gray or .gray containers */
+      html[data-theme="dark"] body.gray,
+      html[data-theme="dark"] .gray { background: var(--bg) !important; color: var(--fg) !important; }
+      /* Some pages use .box/.box-header wrappers */
+      html[data-theme="dark"] .box, html[data-theme="dark"] .box-header, html[data-theme="dark"] .box-body { background: var(--bg-elev) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      /* Theme toggle button uses current theme colors */
+      .theme-toggle { border: 1px solid var(--border); background: transparent; color: var(--fg); border-radius: 4px; padding: 4px 8px; margin-right: 10px; }
+      /* Ensure second-level menu is readable in dark theme */
+      html[data-theme="dark"] .menu.lvl2 { background: var(--bg) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      html[data-theme="dark"] .menu.lvl2 ul li a { color: var(--fg) !important; }
+      html[data-theme="dark"] .menu.lvl2 ul li.active > a,
+      html[data-theme="dark"] .menu.lvl2 ul li a:hover,
+      html[data-theme="dark"] .menu.lvl2 ul li a:focus { color: var(--link-hover) !important; }
+      html[data-theme="dark"] .menu.lvl2 .badge { background: var(--muted) !important; color: var(--bg) !important; }
+    </style>
+    <script>
+      // Apply preferred theme ASAP to avoid flash
+      (function(){
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          if (theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
+        } catch (e) {}
+      })();
+    </script>
     <script>
       // Global Configuration
       window.__CSC__ = {
@@ -64,6 +185,44 @@
 
     {{ render_bundle('vendor', config='V1', extension='js') }}
     {{ render_bundle('main', config='V1', extension='js') }}
+
+    <script>
+      (function(){
+        function applyIcon() {
+          var btn = document.getElementById('theme-toggle');
+          if (!btn) return;
+          var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          btn.innerHTML = isDark ? '<i class="fa fa-sun-o"></i>' : '<i class="fa fa-moon-o"></i>';
+        }
+        function setTheme(theme){
+          if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme','dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+          try { localStorage.setItem('theme', theme); } catch (e) {}
+          applyIcon();
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+          var btn = document.getElementById('theme-toggle');
+          if (btn) {
+            btn.addEventListener('click', function(){
+              var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+              setTheme(isDark ? 'light' : 'dark');
+            });
+            applyIcon();
+          }
+          // React to system changes only if user hasn't chosen explicitly
+          try {
+            var stored = localStorage.getItem('theme');
+            if (!stored && window.matchMedia) {
+              var mq = window.matchMedia('(prefers-color-scheme: dark)');
+              mq.addEventListener ? mq.addEventListener('change', function(e){ setTheme(e.matches ? 'dark':'light'); }) : mq.addListener(function(e){ setTheme(e.matches ? 'dark':'light'); });
+            }
+          } catch (e) {}
+        });
+      })();
+    </script>
 
     {% block javascripts %}{% endblock javascripts %}
   </body>

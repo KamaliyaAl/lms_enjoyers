@@ -8,7 +8,7 @@ from vanilla import GenericModelView, TemplateView
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, OuterRef, Subquery, DateTimeField
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
@@ -28,7 +28,7 @@ from info_blocks.constants import CurrentInfoBlockTags
 from info_blocks.models import InfoBlock
 from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Enrollment, StudentAssignment, AssignmentComment, AssignmentSubmissionTypes
 from learning.permissions import (
     CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
     EnrollOrLeavePermissionObject, ViewCourses, ViewOwnStudentAssignment,
@@ -110,13 +110,28 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
             course__completed_at__gt=today
         )
         left_courses = [e.course_id for e in left_enrollments]
-        return (StudentAssignment.objects
-                .for_student(self.request.user)
-                .filter(assignment__course__completed_at__gt=today)
-                .exclude(assignment__course__pk__in=left_courses)
-                .order_by('assignment__deadline_at',
-                          'assignment__course__meta_course__name',
-                          'pk'))
+        qs = (StudentAssignment.objects
+              .for_student(self.request.user)
+              .filter(assignment__course__completed_at__gt=today)
+              .exclude(assignment__course__pk__in=left_courses))
+        # Annotate last solution datetime for sorting by last activity
+        last_solution_sq = (AssignmentComment.objects
+                            .filter(student_assignment=OuterRef('pk'), type=AssignmentSubmissionTypes.SOLUTION)
+                            .order_by('-created')
+                            .values('created')[:1])
+        qs = qs.annotate(last_solution_at=Subquery(last_solution_sq, output_field=DateTimeField()))
+        sort = self.request.GET.get('sort') or 'deadline_asc'
+        if sort == 'deadline_desc':
+            qs = qs.order_by('-assignment__deadline_at', 'assignment__course__meta_course__name', 'pk')
+        elif sort == 'title_asc':
+            qs = qs.order_by('assignment__title', 'pk')
+        elif sort == 'title_desc':
+            qs = qs.order_by('-assignment__title', 'pk')
+        elif sort == 'last_activity_desc':
+            qs = qs.order_by('-last_solution_at', 'pk')
+        else:  # deadline_asc default
+            qs = qs.order_by('assignment__deadline_at', 'assignment__course__meta_course__name', 'pk')
+        return qs
 
     def get_context_data(self, filter_form: StudentAssignmentListFilter,
                          enrolled_in_courses: List[int],
@@ -174,11 +189,13 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
             filter_course = filter_form.cleaned_data["course"]
             filter_formats = filter_form.cleaned_data["format"]
             filter_statuses = filter_form.cleaned_data["status"]
+            filter_sort = filter_form.cleaned_data.get("sort") or 'deadline_asc'
             url = reverse('study:assignment_list')
             params = parse.urlencode({
                 'course': [] if filter_course is None else filter_course,
                 'format': filter_formats,
-                'status': filter_statuses
+                'status': filter_statuses,
+                'sort': filter_sort,
             }, doseq=True)
             return redirect(f"{url}?{params}")
         context = self.get_context_data(filter_form=filter_form,

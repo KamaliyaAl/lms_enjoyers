@@ -16,6 +16,46 @@
     {% endblock hightlight_styles %}
     {% block stylesheets %} {% endblock stylesheets %}
     <script>
+      (function(){
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          if (theme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      /* Dark theme only: light theme remains untouched */
+      html[data-theme="dark"], html[data-theme="dark"] body { background: #111827 !important; color: #F3F4F6 !important; min-height: 100vh; }
+      /* Common layout wrappers */
+      html[data-theme="dark"] .container,
+      html[data-theme="dark"] .row,
+      html[data-theme="dark"] .page,
+      html[data-theme="dark"] .page-content,
+      html[data-theme="dark"] .container-fluid,
+      html[data-theme="dark"] body.gray,
+      html[data-theme="dark"] .gray { background: #111827 !important; color: #F3F4F6 !important; }
+      /* Panels/cards/forms/dropdowns */
+      html[data-theme="dark"] .panel, html[data-theme="dark"] .panel-heading, html[data-theme="dark"] .panel-footer,
+      html[data-theme="dark"] .well, html[data-theme="dark"] .modal-content, html[data-theme="dark"] .dropdown-menu,
+      html[data-theme="dark"] .list-group-item, html[data-theme="dark"] .tab-content,
+      html[data-theme="dark"] .breadcrumb, html[data-theme="dark"] .pagination > li > a, html[data-theme="dark"] .pagination > li > span,
+      html[data-theme="dark"] .alert { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+      html[data-theme="dark"] .form-control, html[data-theme="dark"] select, html[data-theme="dark"] input, html[data-theme="dark"] textarea { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+      /* Headings/text must be light */
+      html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+      html[data-theme="dark"] h4, html[data-theme="dark"] h5, html[data-theme="dark"] h6,
+      html[data-theme="dark"] p, html[data-theme="dark"] li, html[data-theme="dark"] td,
+      html[data-theme="dark"] th, html[data-theme="dark"] span { color: #F3F4F6 !important; }
+      /* Bootstrap-select */
+      html[data-theme="dark"] .bootstrap-select .btn,
+      html[data-theme="dark"] .bootstrap-select > .dropdown-toggle { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+      html[data-theme="dark"] .bootstrap-select .dropdown-menu,
+      html[data-theme="dark"] .bootstrap-select .filter-option,
+      html[data-theme="dark"] .bootstrap-select .filter-option-inner,
+      html[data-theme="dark"] .bootstrap-select .filter-option-inner-inner { background: #111827 !important; color: #F3F4F6 !important; }
+    </style>
+    <script>
       // Global Configuration
       window.__CSC__ = {
           config: {

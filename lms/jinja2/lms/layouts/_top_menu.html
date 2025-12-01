@@ -21,6 +21,7 @@
             </ul>
         </div>
         <div class="menu-right" id="login" data-user-id="{{ user.pk|default("") }}">
+            <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"><i class="fa fa-moon-o"></i></button>
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

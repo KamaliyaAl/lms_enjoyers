@@ -82,6 +82,19 @@ class StudentAssignmentListFilter(forms.Form):
         widget=forms.Select(attrs={"class": "form-control"})
     )
 
+    SORT_CHOICES = (
+        ("deadline_asc", _("Nearest deadline")),
+        ("deadline_desc", _("Farthest deadline")),
+        ("title_asc", _("Title A→Z")),
+        ("title_desc", _("Title Z→A")),
+        ("last_activity_desc", _("Last homework activity")),
+    )
+    sort = forms.ChoiceField(
+        label=_("Sort by"), required=False, initial="deadline_asc",
+        choices=SORT_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+
     def __init__(self, enrolled_in: List[int], **kwargs):
         super().__init__(**kwargs)
         self.helper = FormHelper(self)
@@ -90,10 +103,11 @@ class StudentAssignmentListFilter(forms.Form):
                 Div('format', css_class='col-xs-3'),
                 Div('status', css_class='col-xs-3'),
                 Div('course', css_class='col-xs-3'),
+                Div('sort', css_class='col-xs-2'),
                 Div(Submit('apply', _('Apply'),
                            css_class="btn btn-primary btn-outline "
                                      "btn-block -inline-submit"),
-                    css_class="col-xs-3"),
+                    css_class="col-xs-1"),
             ))
         courses = (Course.objects.filter(pk__in=enrolled_in).select_related("meta_course"))
         self.fields['course'].choices = [

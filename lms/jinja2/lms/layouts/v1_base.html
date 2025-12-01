@@ -3,12 +3,15 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=960">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
     <title>{% block title %}{{ request.site.name }}{% endblock title %}</title>
     <link rel="shortcut icon" type="image/png" href="{{ static(FAVICON_PATH) }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='{{ static("v1/dist/css/center_style.css") }}' rel="stylesheet">
+    <link href="{{ static("v1/dist/css/center_style.css") }}" rel="stylesheet">
+    <!-- Lightweight responsive fixes loaded after legacy bundle -->
+    <link href="{{ static("v1/dist/css/responsive-overrides.css") }}" rel="stylesheet">
     {% if request.user.is_curator %}
         <link href='{{ static("v1/dist/css/center_staff.css") }}' rel="stylesheet">
     {% endif %}

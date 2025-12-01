@@ -1,0 +1,311 @@
+/* Lightweight responsive fixes for V1 layout (Bootstrap 3 era styles)
+   Scope: only presentation; no behavior change. */
+
+/* Base: prevent accidental horizontal scroll */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+/* Make sizing predictable across legacy CSS */
+*, *::before, *::after { box-sizing: border-box; }
+
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Containers: ensure reasonable paddings up to tablet widths (fixes header clipping around ~799px) */
+@media (max-width: 991px) {
+  .container {
+    width: 100% !important;
+    padding-left: 12px;
+    padding-right: 12px;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .row {
+    margin-left: -12px;
+    margin-right: -12px;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  /* Prevent legacy fixed/min widths on grid columns from forcing horizontal scroll */
+  [class*="col-"] {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Header/menu (V1) */
+/* Default header markup lives in lms/templates/_top_menu.html and jinja2 equivalent */
+/* Remove any legacy fixed min-width that could push the header off-screen */
+.header .menu.lvl1,
+.header .menu.lvl2 { min-width: 0 !important; max-width: 100% !important; }
+/* Baseline (all widths): keep login aligned right, respect existing header layout */
+.header .menu-left { min-width: 0; overflow: visible; }
+.header .menu-right { margin-left: auto; display: flex; align-items: center; white-space: nowrap; min-width: 0; }
+/* Ensure user dropdown aligns to the right and appears above */
+.header .menu-right .dropdown-menu { right: 0; left: auto; }
+.header .dropdown-menu { z-index: 1001; }
+/* Keep the login/profile block always inside the 64px header bar */
+.header .menu.lvl1 .container { position: relative; }
+.header .menu-right {
+  position: absolute;
+  right: 14px;
+  top: 0;
+  height: 64px;
+  margin-left: 0 !important; /* override any auto margins from flex layout */
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  z-index: 1002; /* above menus */
+}
+@media (min-width: 768px) {
+  /* Reserve space on the right so the main menu doesn't run under the login */
+  .header .menu-left { padding-right: 120px; }
+}
+/* Tighter first-level menu between 768px and 991px so the login stays visible */
+@media (min-width: 768px) and (max-width: 991px) {
+  .header .menu-left ul { display: flex; flex-wrap: nowrap; overflow: hidden; }
+  .header .menu-left ul li { float: none; padding: 0 8px; }
+}
+@media (max-width: 575px) {
+  .header .menu-right { right: 10px; }
+}
+@media (max-width: 767px) {
+  .header { position: relative; }
+  /* Keep logo on the first row with login icon; let the main menu wrap below */
+  .header .menu-left { flex: 1 1 auto; display: flex; align-items: center; min-width: 0; overflow: visible; }
+  .header .logo-cell { flex: 0 0 auto; }
+  .header .logo-cell img { max-height: 28px; width: auto; }
+  /* Respect existing mobile dropdown behavior from center styles; no UL overrides here */
+  .header .menu-right { flex: 0 0 auto; text-align: right; margin-top: 0; margin-left: auto; min-width: 0; align-self: center; display: flex; align-items: center; white-space: nowrap; }
+  .header .menu-right a, .header .menu-right #user-menu {
+    padding: 8px 10px; /* bigger tap area */
+  }
+}
+
+/* Hide logo on very small screens to save space and keep header compact */
+@media (max-width: 575px) {
+  .header .logo-cell { display: none !important; }
+  /* Allow main menu to share the first row when logo is hidden */
+  .header .menu-left ul { flex: 1 1 auto; margin-top: 0; }
+}
+
+/* Second level menu: wrap, no horizontal scroll */
+@media (max-width: 767px) {
+  .menu.lvl2 .container ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    max-width: 100%;
+    white-space: normal;
+    padding: 0;
+  }
+  .menu.lvl2 .container ul.__narrow {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    white-space: normal !important;
+  }
+  .menu.lvl2 .container ul li { display: block; }
+}
+
+/* Typography adjustments for readability on phones */
+@media (max-width: 480px) {
+  body { font-size: 15px; line-height: 1.45; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+}
+
+/* Forms */
+@media (max-width: 767px) {
+  .form-horizontal .control-label { text-align: left; padding-top: 0; }
+  .form-control { width: 100%; min-height: 40px; }
+  .btn { min-height: 40px; }
+  .input-group { width: 100%; }
+  /* Avoid long labels/links forcing horizontal scroll */
+  .nav a, .breadcrumb, .panel-title, .page-header, .modal-title {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  /* Very long URLs/text in content */
+  .content a, .markdown a, .content p, .markdown p, .content li, .markdown li {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn, button, input[type="submit"], input[type="button"] {
+    padding-left: 12px; padding-right: 12px;
+    min-height: 40px;
+  }
+}
+
+/* Tables: fit to viewport width with wrapping instead of horizontal scroll */
+@media (max-width: 767px) {
+  table, .table { width: 100% !important; table-layout: fixed; }
+  thead, tbody, tfoot { width: 100%; }
+  .table th, .table td, table th, table td {
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Calendars (admin and site): readable and scrollable on small screens */
+.calendarbox, .datetimeshortcuts { max-width: 100%; }
+.calendarbox .calendar { width: 100%; }
+.calendarbox, .calendar-module, .calendar {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.calendar caption, .calendar th, .calendar td { white-space: nowrap; }
+@media (max-width: 767px) {
+  /* Keep 7 columns reasonably wide and enable horizontal scrolling */
+  table.calendar, .table.calendar {
+    display: block;                  /* allow local horizontal scroll */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: auto !important;         /* override global table 100% rule */
+    min-width: 910px;               /* 7 * 130px from legacy styles */
+    table-layout: fixed;
+  }
+  /* Make the calendar container horizontally scrollable so the whole block can scroll */
+  .timetable-header-row + .row > .col-xs-12 {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .calendar th, .calendar td { width: 130px; }
+  .calendar td .cell { min-width: 0; }  /* allow content to shrink inside cells */
+  /* Header + controls area */
+  .timetable-header-row .h2-and-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .timetable-header-row .h2-and-buttons h2 { flex: 1 0 100%; margin: 0; }
+  .timetable-header-row .btn-toolbar { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+  /* Legend alignment */
+  .event-types { float: none !important; text-align: left; margin: 8px 0 12px; }
+}
+@media (max-width: 480px) {
+  .calendar caption { font-size: 14px; }
+  .calendar th { font-size: 12px; }
+}
+
+/* Utility: stack two-column layouts often used in detail pages */
+@media (max-width: 767px) {
+  .col-sm-6, .col-md-6, .col-lg-6 { float: none; width: 100%; }
+  .col-sm-5, .col-md-5, .col-lg-5,
+  .col-sm-7, .col-md-7, .col-lg-7 { float: none; width: 100%; }
+}
+
+/* Footer: allow shrinking on small screens and avoid forcing horizontal scroll */
+.footer { min-width: 0 !important; width: 100% !important; }
+.footer, .footer .container, .footer .row { max-width: 100% !important; }
+.footer a, .footer span { white-space: normal; }
+
+
+/* Code blocks and preformatted */
+pre, code { white-space: pre-wrap; word-wrap: break-word; }
+
+/* Markdown content images/videos */
+.content img, .markdown img { height: auto; }
+
+/* Completed courses (Archive tab) — mobile-friendly stacked rows */
+@media (max-width: 767px) {
+  ._students-courses-list table._archive thead { display: none; }
+  ._students-courses-list table._archive { width: 100% !important; }
+  ._students-courses-list table._archive tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid #eee; margin: 0; }
+  ._students-courses-list table._archive tbody tr:last-child { border-bottom: none; }
+  ._students-courses-list table._archive td { display: flex; width: 100%; padding: 6px 0 !important; align-items: center; justify-content: space-between; }
+  ._students-courses-list table._archive td:first-child { display: block; font-weight: 600; padding-top: 0 !important; }
+  ._students-courses-list table._archive td:nth-child(2)::before { content: "Grade"; color: #666; margin-right: 8px; }
+  ._students-courses-list table._archive td:nth-child(3)::before { content: "Semester"; color: #666; margin-right: 8px; }
+  ._students-courses-list table._archive td .badge { margin-left: 8px; }
+}
+
+
+/* Teaching → Assignments queue: make toolbar/buttons and columns responsive */
+@media (max-width: 991px) {
+  /* Stack main/content and sidebar */
+  .__react-app[data-component="AssignmentsCheckQueue"] .col-xs-9,
+  .__react-app[data-component="AssignmentsCheckQueue"] .col-xs-3 { float: none; width: 100%; }
+  /* Also scope via body attribute to ensure it applies even if React root differs */
+  body[data-init-sections~="assignmentsCheckQueue"] .col-xs-9,
+  body[data-init-sections~="assignmentsCheckQueue"] .col-xs-3 { float: none !important; width: 100% !important; }
+  body[data-init-sections~="assignmentsCheckQueue"] .col-xs-3 { margin-top: 12px; }
+}
+@media (max-width: 767px) {
+  /* Allow status buttons to wrap neatly without shrinking */
+  .__react-app[data-component="AssignmentsCheckQueue"] .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .__react-app[data-component="AssignmentsCheckQueue"] .btn-group .btn { margin: 0; flex: 0 0 auto; padding: 8px 12px; min-height: 38px; line-height: 1.25; }
+  .__react-app[data-component="AssignmentsCheckQueue"] .btn-group.btn-group-sm .btn { padding: 8px 12px; }
+  /* Make sort controls wrap inline with breathing room */
+  .__react-app[data-component="AssignmentsCheckQueue"] .col-xs-9 .btn.btn-link { padding-left: 0; padding-right: 14px; line-height: 1.4; }
+  /* CourseFilterForm: stack columns and make selects full width */
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters .col-xs-4,
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters .col-xs-5,
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters .col-xs-3 { float: none !important; width: 100% !important; }
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters .col-xs-3 .btn { margin-top: 10px; }
+  /* Bootstrap-select pickers rendered as button dropdowns */
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters .bootstrap-select,
+  body[data-init-sections~="assignmentsCheckQueue"] #assignment-filters select.form-control { width: 100% !important; }
+}
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Prevent shrink on mid-size tablets too */
+  .__react-app[data-component="AssignmentsCheckQueue"] .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .__react-app[data-component="AssignmentsCheckQueue"] .btn-group .btn { flex: 0 0 auto; }
+}
+
+/* Student Assignment list (server-rendered, crispy form): stack filters and make pickers full width */
+@media (max-width: 991px) {
+  /* Scope to the page that sets this data attribute: lms/jinja2/lms/study/assignment_list.html */
+  body[data-init-sections~="selectpickers"] form .row > [class*="col-xs-"] {
+    float: none !important;
+    width: 100% !important;
+  }
+  body[data-init-sections~="selectpickers"] form .row > [class*="col-"] {
+    margin-bottom: 10px;
+  }
+  /* Ensure bootstrap-select widgets and native selects stretch to full width */
+  body[data-init-sections~="selectpickers"] .bootstrap-select,
+  body[data-init-sections~="selectpickers"] select.form-control {
+    width: 100% !important;
+  }
+  /* Make the Apply button span full width and add breathing room */
+  body[data-init-sections~="selectpickers"] .-inline-submit {
+    width: 100%;
+  }
+}
+
+/* Course details → Assignments tab: normalize headers/cells rendering on phones
+   Context: texts like "Assignment Format", "Files" and value like "Online Submission"
+   could render vertically or with broken letter layout due to generic mobile table rules.
+   Fix: ensure horizontal writing mode and relax table-layout for this specific table only. */
+@media (max-width: 767px) {
+  /* Scope strictly to the Assignments tab table on the course detail page */
+  #course-detail-page #course-assignments table.table,
+  #course-detail-page #course-assignments table.timetable {
+    table-layout: auto !important; /* allow headers to size naturally */
+  }
+  /* Only normalize text flow in columns that had issues: 3 (Assignment Format) and 4 (Files) */
+  #course-detail-page #course-assignments thead th:nth-child(3),
+  #course-detail-page #course-assignments thead th:nth-child(4),
+  #course-detail-page #course-assignments tbody td:nth-child(3),
+  #course-detail-page #course-assignments tbody td:nth-child(4),
+  #course-detail-page #course-assignments tr > th:nth-child(3),
+  #course-detail-page #course-assignments tr > th:nth-child(4),
+  #course-detail-page #course-assignments tr > td:nth-child(3),
+  #course-detail-page #course-assignments tr > td:nth-child(4) {
+    writing-mode: horizontal-tb !important; /* force normal horizontal text */
+    text-orientation: mixed !important;
+    transform: none !important; /* guard against accidental rotations */
+    white-space: normal !important; /* allow multi-line wrapping instead of per-letter */
+    word-break: normal !important;
+  }
+  /* Keep specific non-breaking headers compact if present */
+  #course-detail-page #course-assignments th.nobreak {
+    white-space: nowrap !important;
+  }
+}

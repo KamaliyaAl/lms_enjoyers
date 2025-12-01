@@ -15,7 +15,10 @@
 
 {% block nav-global %}{% endblock %}
 
-{% block extrastyle %}{{ block.super }}{% endblock %}
+{% block extrastyle %}
+  {{ block.super }}
+  <link href="{% static 'v1/dist/css/responsive-overrides.css' %}" rel="stylesheet">
+{% endblock %}
 
 
 {% block footer %}

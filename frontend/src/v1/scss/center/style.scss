@@ -109,6 +109,92 @@ page[size="A4"] {
 .bg-gray {
   background-color: $background-grey;
 }
+
+// ---------------------------------------------------------------------------
+// Mobile fix: comment form attachment controls
+// Move responsive overrides from ignored CSS into the main tracked SCSS bundle
+// so that the fix ships with center_style.css
+// Scope strictly to #comment-form-wrapper to avoid side effects on other forms
+@media (max-width: 768px) {
+  #comment-form-wrapper {
+    .form-group { max-width: 100%; }
+    // Ensure legacy grid columns stack on narrow screens
+    [class*="col-"] { float: none !important; width: 100% !important; }
+    .input-group { display: block; width: 100% !important; }
+    input[type="file"] { display: block; width: 100%; max-width: 100%; }
+    // Jasny Bootstrap FileInput widget renders its own structure
+    // Target visible container and controls instead of hidden native input
+    .fileinput {
+      display: block; // or table in some themes; block works here
+      width: 100%;
+      max-width: 100%;
+    }
+    .fileinput .btn-file {
+      width: 100%;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .fileinput .fileinput-filename {
+      display: block;
+      margin-bottom: 5px;
+      white-space: normal; // allow wrapping of long filenames
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    // Handle both states of Jasny widget
+    .fileinput-new,
+    .fileinput-exists {
+      display: block;
+      width: 100%;
+    }
+    // If a custom file control renders a button next to the input, push it below
+    .btn,
+    .btn-group { margin-top: 8px; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Student assignment page: selector-independent robust mobile fix
+// Use a stable page-level class instead of relying on #comment-form-wrapper.
+// This addresses cases when the wrapper is missing or flex layout interferes.
+.student-assignment-detail {
+  @media (max-width: 768px) {
+    // General form layout in the comment form area
+    .form-group {
+      display: block !important;
+      width: 100% !important;
+      margin-bottom: 15px !important;
+    }
+
+    // Jasny Bootstrap File Input
+    .fileinput {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    .fileinput .btn-file {
+      display: block !important;
+      width: 100% !important; // defeat inline width or flex quirks
+      float: none !important;
+    }
+    .fileinput .fileinput-filename {
+      display: block !important;
+      margin-top: 5px;
+      white-space: normal;
+    }
+    .fileinput .close {
+      float: none !important;
+      display: inline-block !important;
+    }
+
+    // Submit button full width on mobile
+    button[type="submit"] {
+      display: block !important;
+      width: 100% !important;
+      margin-top: 10px;
+    }
+  }
+}
 .bg-white {
   background-color: $background-white;
 }

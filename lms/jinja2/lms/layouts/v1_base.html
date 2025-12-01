@@ -16,12 +16,6 @@
     <link href='{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}' rel="stylesheet">
     {% endblock hightlight_styles %}
     {% block stylesheets %} {% endblock stylesheets %}
-<!--    <style>-->
-<!--        body.footer {-->
-<!--            background-color: #1a1a1a;-->
-<!--            color: #ffffff;-->
-<!--        }-->
-<!--    </style>-->
     <style>
       /* Only define variables for dark theme to avoid changing light theme */
       html[data-theme="dark"] { /* variables scope */
@@ -126,6 +120,10 @@
       html[data-theme="dark"] .menu.lvl2 ul li a:hover,
       html[data-theme="dark"] .menu.lvl2 ul li a:focus { color: var(--link-hover) !important; }
       html[data-theme="dark"] .menu.lvl2 .badge { background: var(--muted) !important; color: var(--bg) !important; }
+      /* Footer in dark theme */
+      html[data-theme="dark"] .footer { background: var(--bg) !important; color: var(--fg) !important; border-color: var(--border) !important; }
+      html[data-theme="dark"] .footer a { color: #FFFFFF !important; }
+      html[data-theme="dark"] .footer a:hover, html[data-theme="dark"] .footer a:focus { color: #E5E7EB !important; }
     </style>
     <script>
       // Apply preferred theme ASAP to avoid flash

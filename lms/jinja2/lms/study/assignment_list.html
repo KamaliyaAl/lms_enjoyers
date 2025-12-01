@@ -2,6 +2,13 @@
 
 {% block body_attrs %} class="gray" data-init-sections="selectpickers"{% endblock body_attrs %}
 
+{% block stylesheets %}
+  <style>
+    html[data-theme="dark"] .footer { background: #111827 !important; color: #F3F4F6 !important; border-color: #374151 !important; }
+    html[data-theme="dark"] .footer a { color: #FFFFFF !important; }
+    html[data-theme="dark"] .footer a:hover, html[data-theme="dark"] .footer a:focus { color: #E5E7EB !important; }
+  </style>
+{% endblock stylesheets %}
 {% block content %}
   <div class="container">
     {{ crispy(filter_form) }}

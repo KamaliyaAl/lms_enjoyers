@@ -40,6 +40,8 @@ from learning.services.personal_assignment_service import (
     get_assignment_update_history_message, get_draft_comment
 )
 from learning.study.forms import AssignmentCommentForm, StudentAssignmentListFilter
+from learning.forms import AssignmentModalCommentForm
+from learning.models import AssignmentComment
 from learning.study.services import get_solution_form, save_solution_form, get_current_semester_active_courses
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
@@ -257,6 +259,54 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
         msg = _("Comment successfully saved")
         messages.success(self.request, msg)
         return self.student_assignment.get_student_url()
+
+
+class StudentAssignmentCommentUpdateView(generic.UpdateView):
+    model = AssignmentComment
+    pk_url_kwarg = 'comment_pk'
+    context_object_name = 'comment'
+    template_name = 'learning/study/modal_update_assignment_comment.html'
+    form_class = AssignmentModalCommentForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        # Возвращаем JSON как и в teaching
+        from core.utils import render_markdown
+        from django.http import JsonResponse
+        html = render_markdown(self.object.text)
+        tz = getattr(self.request.user, 'time_zone', None)
+        modified_local = self.object.modified
+        if tz:
+            from django.utils import timezone
+            modified_local = timezone.localtime(self.object.modified, timezone=tz)
+        modified_human = modified_local.strftime('%d.%m.%Y %H:%M')
+        return JsonResponse({
+            "success": 1,
+            "id": self.object.pk,
+            "html": html,
+            "modified_iso": self.object.modified.isoformat(),
+            "modified_human": modified_human
+        })
+
+    def form_invalid(self, form):
+        from django.http import JsonResponse
+        return JsonResponse({"success": 0, "errors": form.errors})
+
+    def check_permissions(self, comment: AssignmentComment):
+        # Разрешаем редактирование только автору комментария
+        if comment.author_id != self.request.user.pk:
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.check_permissions(self.object)
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.check_permissions(self.object)
+        return super().post(request, *args, **kwargs)
 
     def get_error_url(self):
         return self.student_assignment.get_student_url()

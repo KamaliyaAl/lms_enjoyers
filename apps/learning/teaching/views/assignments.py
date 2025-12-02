@@ -160,21 +160,26 @@ class AssignmentCommentUpdateView(generic.UpdateView):
     def form_valid(self, form):
         self.object = form.save()
         html = render_markdown(self.object.text)
-        return JsonResponse({"success": 1,
-                             "id": self.object.pk,
-                             "html": html})
+        tz = getattr(self.request.user, 'time_zone', None)
+        modified_local = self.object.modified
+        if tz:
+            from django.utils import timezone
+            modified_local = timezone.localtime(self.object.modified, timezone=tz)
+        modified_human = modified_local.strftime('%d.%m.%Y %H:%M')
+        return JsonResponse({
+            "success": 1,
+            "id": self.object.pk,
+            "html": html,
+            "modified_iso": self.object.modified.isoformat(),
+            "modified_human": modified_human
+        })
 
     def form_invalid(self, form):
         return JsonResponse({"success": 0, "errors": form.errors})
 
     def check_permissions(self, comment):
-        # Allow view/edit own comments to teachers and all to curators
-        if not self.request.user.is_curator:
-            is_teacher = self.request.user.is_teacher
-            if comment.author_id != self.request.user.pk or not is_teacher:
-                raise PermissionDenied
-            if comment.is_stale_for_edit:
-                raise PermissionDenied
+        if comment.author_id != self.request.user.pk:
+            raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

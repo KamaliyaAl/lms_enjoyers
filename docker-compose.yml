@@ -1,0 +1,73 @@
+
+services:
+  lms-postgres:
+    image: postgres:16-alpine
+    container_name: lms-postgres
+    networks:
+      - lms-net
+    ports:
+      - "127.0.0.1:5433:5432"  # host 5433 -> container 5432 (5432 may be busy on host)
+    environment:
+      POSTGRES_USER: csc
+      POSTGRES_DB: cscdb
+      POSTGRES_PASSWORD: FooBar
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U csc -d cscdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  lms-redis:
+    image: redis:6-alpine
+    container_name: lms-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - lms-net
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  lms-app:
+    container_name: lms-app
+    build:
+      context: .
+      dockerfile: docker-files/Dockerfile
+      args:
+        WEBPACK_ENVIRONMENT: "local"
+    image: lms-enjoyers:local
+    depends_on:
+      lms-postgres:
+        condition: service_healthy
+      lms-redis:
+        condition: service_healthy
+    networks:
+      - lms-net
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      ENV_FILE: /var/www/code/.env.docker
+    volumes:
+      - media:/var/www/media
+      - static:/var/www/static
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8001/health-check/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+networks:
+  lms-net:
+
+volumes:
+  pgdata:
+  redisdata:
+  media:
+  static:

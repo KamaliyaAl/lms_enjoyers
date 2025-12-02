@@ -676,6 +676,8 @@ EpicEditor.prototype.load = function (callback) {
   self.iframe.write(_HtmlTemplates.chrome);
 
   self.utilPanel = self.iframe.getElementById('epiceditor-utilbar');
+  // Ensure utilbar is visible (was rendered with inline opacity:0)
+  try { if (self.utilPanel) { self.utilPanel.style.opacity = '1'; } } catch(e) {}
 
   // Now that we got the innards of the iframe, we can grab the other iframes
   self.editorIframe = self.iframe.getElementById('epiceditor-editor-frame');

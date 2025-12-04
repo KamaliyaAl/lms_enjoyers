@@ -8,7 +8,6 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional
 from urllib.parse import parse_qs, urlparse
 
 import bleach
-import hoep as h
 import sqids.constants
 from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
@@ -18,6 +17,9 @@ from django.template import loader
 from django.utils import formats
 from django.utils.html import linebreaks, strip_tags
 from django_jinja.builtins.extensions import make_template_fragment_key
+from markdown_it import MarkdownIt
+from mdit_py_plugins.footnote import footnote_plugin
+from mdit_py_plugins.texmath import texmath_plugin 
 from sqids import Sqids
 
 logger = logging.getLogger(__name__)
@@ -36,18 +38,23 @@ class Empty(enum.Enum):
 
 _empty = Empty.token
 
-# Some details here https://github.com/Anomareh/Hoep
-MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |
-                       h.EXT_AUTOLINK |
-                       h.EXT_STRIKETHROUGH |
-                       h.EXT_TABLES |
-                       h.EXT_QUOTE |
-                       h.EXT_NO_INTRA_EMPHASIS |
-                       h.EXT_SPACE_HEADERS |
-                       h.EXT_MATH |
-                       h.EXT_MATH_EXPLICIT)
-MARKDOWN_RENDER_FLAGS = 0
-markdown = h.Hoep(MARKDOWN_EXTENSIONS, MARKDOWN_RENDER_FLAGS)
+markdown = (
+    MarkdownIt(
+        "commonmark",
+        {
+            "html": True, 
+            "linkify": True, 
+            "typographer": False,
+        },
+    )
+    .enable("strikethrough")
+    .enable("table") 
+    .use(footnote_plugin)
+    .use(
+        texmath_plugin
+        delimiters="dollars",
+    )
+)
 
 # This is not really about markdown, This is about html tags that will be
 # saved after markdown rendering
@@ -98,9 +105,12 @@ MARKDOWN_ALLOWED_ATTRS = {
 
 def render_markdown(text):
     """Renders markdown, then sanitizes html based on allowed tags"""
-    md_rendered = markdown.render(text)
-    return bleach.clean(md_rendered, tags=MARKDOWN_ALLOWED_TAGS,
-                        attributes=MARKDOWN_ALLOWED_ATTRS)
+    md_rendered = markdown.render(text or "")
+    return bleach.clean(
+        md_rendered,
+        tags=MARKDOWN_ALLOWED_TAGS,
+        attributes=MARKDOWN_ALLOWED_ATTRS,
+    )
 
 
 def render_markdown_and_cache(value, fragment_name, expires_in=0, *vary_on):
